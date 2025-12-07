@@ -7,7 +7,6 @@ import { join } from 'path';
 
 import resolvers from './resolvers';
 
-// Load schema from .gql file
 const typeDefs = readFileSync(
   join(__dirname, 'schema.gql'),
   'utf8'
