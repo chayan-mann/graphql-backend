@@ -1,71 +1,31 @@
-import { ApolloServer } from "@apollo/server";
-import {startStandaloneServer} from '@apollo/server/standalone';
+import express from 'express';
+import cors from 'cors';
+import { graphqlHTTP } from 'express-graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-const users = [
-    {id: "1", name: "John Doe", age: 23, isMarried: true},
-    {id: "2", name: "John ", age: 23, isMarried: true}
-]
-const typeDefs = `
-    type Query {
-        getUsers: [User]
-        getUserById(id: ID!): User
-    }
+import resolvers from './resolvers';
 
-    type Mutation {
-        createUser(
-        name: String!,
-        age: Int!,
-        isMarried: Boolean!
-        ): User
-    }
+// Load schema from .gql file
+const typeDefs = readFileSync(
+  join(__dirname, 'schema.gql'),
+  'utf8'
+);
 
-    type User {
-        id: ID
-        name: String
-        age: Int
-        isMarried: Boolean
-    }
-`;
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-const resolvers = {
-    Query: {
-        getUsers: () => {
-            return users;
-        },
-        getUserById: (parent, args) => {
-            const id = args.id
-            return users.find(user => user.id);
-        },
-    },
-    Mutation: {
-        createUser: (parent, args) => {
-            const {name, age, isMarried} = args;
-            const newUser = {
-                id: (users.length+ 1).toString(),
-                name,
-                age,
-                isMarried,
-            };
-            users.push(newUser);
-        }
-    },
-};
+const app = express();
+app.use(cors());
 
-const server = new ApolloServer({
-    typeDefs, resolvers
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema,
+    graphiql: true
+  })
+);
+
+app.listen(4000, () => {
+  console.log('GraphQL running at http://localhost:4000/graphql');
 });
-
-const {url} = await startStandaloneServer(server, {
-    listen : { port:4000},
-});
-
-console.log(`Server running at: ${url}`);
-
-
-// query, mutation 
-
-
-
-
-
-

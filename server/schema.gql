@@ -1,0 +1,72 @@
+enum ReadingStatus {
+  WANT_TO_READ
+  READING
+  FINISHED
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  readingList: [ReadingListItem!]!
+}
+
+type ReadingListItem {
+  book: Book!
+  status: ReadingStatus!
+}
+
+type Author {
+  id: ID!
+  name: String!
+  bio: String
+  books: [Book!]!
+}
+
+type Book {
+  id: ID!
+  title: String!
+  description: String
+  author: Author!
+  tags: [String!]!
+  reviews: [Review!]!
+  averageRating: Float
+}
+
+type Review {
+  id: ID!
+  user: User!
+  book: Book!
+  rating: Int!
+  comment: String
+}
+
+type Query {
+  me: User
+  books(search: String, tag: String): [Book!]!
+  book(id: ID!): Book
+  authors: [Author!]!
+  author(id: ID!): Author
+  reviewsByBook(bookId: ID!): [Review!]!
+}
+
+input AddBookInput {
+  title: String!
+  description: String
+  authorId: ID!
+  tags: [String!]!
+}
+
+input AddReviewInput {
+  bookId: ID!
+  rating: Int!
+  comment: String
+}
+
+type Mutation {
+  addAuthor(name: String!, bio: String): Author!
+  addBook(input: AddBookInput!): Book!
+  addToReadingList(bookId: ID!, status: ReadingStatus!): User!
+  updateReadingStatus(bookId: ID!, status: ReadingStatus!): User!
+  addReview(input: AddReviewInput!): Review!
+}
